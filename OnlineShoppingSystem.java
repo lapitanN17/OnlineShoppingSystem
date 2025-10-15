@@ -11,7 +11,7 @@ public class Main {
             "\n=== WELCOME! ===",
             "1 - Register",
             "2 - Login",
-            "Enter choice (Or press Enter when empty to Exit): "
+            "Enter choice (Press Enter when empty to Exit Program): "
             ));
 
             String choice = null;
@@ -58,7 +58,7 @@ public class Main {
     //Register Email
     public static String register(BufferedReader br) {
         while (true) {
-            System.out.print("\nRegister - Enter your Email\n(Press Enter to go back): ");
+            System.out.print("\nRegister - Enter your Email\n(Press Enter when empty to go back): ");
             try {
                 String email = br.readLine();
                 if (email == null || email.trim().isEmpty()) return null;
@@ -180,7 +180,7 @@ public class Main {
             "Product Description:",
             productDescription[selected],
             "",
-            "Press Enter when empty to go back to product list"
+            "(Press Enter when empty to go back): "
             ));
             
             try {
