@@ -170,6 +170,8 @@ public class Main {
         }
     }
 
+
+
     //Shopping Mall Interface
     public static void shoppingMall(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail) {
         String[] products = {
@@ -194,7 +196,7 @@ public class Main {
             "\n=== Shopping Mall ===",
             "(Type 'SEARCH' to open search box and search a product)",
             "(Type 'CART' to open shopping cart)",
-            "(Type 'EDIT' to edit username)",
+            "(Type 'USERNAME' to edit username)",
             "(Type 'PASSWORD' to change password)",
             "(Type 'DELETE' to delete account",
             ""
@@ -234,39 +236,11 @@ public class Main {
                             break;
                         }
                         
-                        boolean found = false;
-                        System.out.println("\n=== SEARCH RESULTS ===");
-                        for (int i = 0; i < products.length; i++) {
-                            //Make searchbox not case sensitive
-                            if (products[i].toLowerCase().contains(searchbox.toLowerCase())) {
-                                System.out.println(String.join(System.lineSeparator(),
-                                i + " - " + products[i],
-                                "₱" + cost[i],
-                                "",
-                                "(Press Enter when empty to go back)",
-                                "Select Product: "
-                                ));
-                                found = true;
-                            }
-                        }
-                        if (!found) System.out.println("Product not found");
-                        
-                        try {
-                            input = br.readLine();
-                            if (input == null || input.trim().isEmpty()) {
-                                System.out.println("\nReturning to login page...");
-                                return;
-                            }
-                        } catch (IOException e) {
-                            System.out.println("Error");
-                            continue;
-                        }
-                        
-                        selectProduct(br, input, products, cost, productDescription); //<Call Function
+                        searchBoxSelection(br, input, searchbox, products, cost, productDescription);
                     }
                     continue;
                     
-                case "EDIT":
+                case "USERNAME":
                     while (true) {
                         System.out.println("\n=== EDIT USERNAME ====");
                         try {
@@ -306,23 +280,57 @@ public class Main {
                     }
                     continue;
                     
-                case "DELETE":
-                    System.out.println("\n");
+                case "PASSWORD":
+                    while (true) {
+                        System.out.println("\n=== CHANGE PASSWORD ====");
+                        try {
+                            System.out.print("Enter Current Password: ");
+                            String inputPassword = br.readLine();
+                        
+                            if (inputPassword == null || inputPassword.isEmpty()) {
+                                System.out.println("\nEdit Cancelled");
+                                break;
+                            }
+                            
+                            for (int i = 0; i < existingAccounts; i++) {
+                                String[] parts = accounts[i].split(",");
+                            
+            //Check if it matches current email and password to ensure it overwrites password
+            //of correct account
+                                if (parts[0].equals(savedEmail) && parts[1].equals(inputPassword)) {
+                                    System.out.print("Enter New Password: ");
+                                    String newPassword = br.readLine();
+                                    
+                                    System.out.print("Enter Again: ");
+                                    String confirmation = br.readLine();
+                                    
+                                    if (!newPassword.equals(confirmation)) {
+                                        System.out.println("Password Doesn't Match! Try Again");
+                                        continue;
+                                    } else {
+                                        accounts[i] = parts[0] + "," + newPassword + "," + parts[2];
+                                        System.out.println("Password Successfully Changed!");
+                                    }
+                                    break;
+                                } else {
+                                    System.out.println("Password Error! Try Again");
+                                    continue;
+                                }
+                            }
+                        } catch (IOException e) {
+                            System.out.println("Error");
+                        }
+                    }
                     continue;
             }
             
-            selectProduct(br, input, products, cost, productDescription); //<Call Function
-        }
-    }
-    
-    public static String selectProduct(BufferedReader br, String input, String[] products, int[] cost, String[] productDescription) {
-        while (true) {
-            int selected; //Convert Input to Integer if not any of the string command above
+            //If not a selection command, convert to int to select product
+            int selected;
             try {
                 selected = Integer.parseInt(input.trim());
             } catch (NumberFormatException e) {
                 System.out.println("\nInvalid number! Try again");
-                continue;
+                return;
             }
 
             if (selected < 0 || selected >= products.length) {
@@ -335,15 +343,87 @@ public class Main {
             "Price: ₱" + cost[selected],
             "Product Description:",
             productDescription[selected],
-            "",
+            "-----------------------------------",
             "(Press Enter when empty to go back)"
             ));
             
             try {
                 String input2 = br.readLine();
-                if (input2 == null || input2.trim().isEmpty()) return null;
+                if (input2 == null || input2.trim().isEmpty()) break;
             } catch (IOException e) {
                 System.out.println("Error");
+            }
+        }
+    }
+    
+    public static void searchBoxSelection(BufferedReader br, String input, String searchbox, String[] products, int[] cost, String[] productDescription) {
+        boolean found = false;
+        while (true) {
+            boolean[] validIndex = new boolean[products.length];
+            System.out.println("\n=== SEARCH RESULTS ===");
+            for (int i = 0; i < products.length; i++) {
+                //Make searchbox not case sensitive
+                if (products[i].toLowerCase().contains(searchbox.toLowerCase())) {
+                    System.out.println(String.join(System.lineSeparator(),
+                    i + " - " + products[i],
+                    "₱" + cost[i],
+                    ""
+                    ));
+                    validIndex[i] = true;
+                    found = true;
+                }
+            }
+                
+            if (!found) {
+                System.out.println("Product not found");
+                continue;
+            }
+                        
+            System.out.print("\n(Press Enter when empty to go back)\nSelect Product: ");
+            int selected;
+            try {
+                input = br.readLine();
+                if (input == null || input.trim().isEmpty()) {
+                    break;
+                }
+                
+                //Convert input to integer          
+                try {
+                    selected = Integer.parseInt(input.trim());
+                    if (!validIndex[selected]) {
+                        System.out.println("Invalid Selection!");
+                        continue;
+                    }
+                } catch (NumberFormatException e) {
+                    System.out.println("\nInvalid number! Try again");
+                    return;
+                }
+                
+                if (selected < 0 || selected >= products.length) {
+                    System.out.println("\nProduct not found!");
+                    continue;
+                }
+                            
+                System.out.println(String.join(System.lineSeparator(),
+                "\nYou selected: " + products[selected],
+                "Price: ₱" + cost[selected],
+                "Product Description:",
+                productDescription[selected],
+                "-----------------------------------",
+                "(Press Enter when empty to go back)"
+                ));
+                          
+                            
+                try {
+                    String input2 = br.readLine();
+                    if (input2 == null || input2.trim().isEmpty()) return;
+                } catch (IOException e) {
+                    System.out.println("Error");
+                }
+                            
+            } catch (IOException e) {
+                System.out.println("Error");
+                continue;
             }
         }
     }
