@@ -10,11 +10,22 @@ public class Main {
         String savedEmail = null, savedPass = null, savedUsername = null;
 
         while (true) {
-            System.out.println(String.join(System.lineSeparator(),
-            "\n=== WELCOME! ===",
+            //Update existingAccounts real time
+            int remainingAccounts = 0;
+            for (String account : accounts) {
+                if (account != null) remainingAccounts++;
+            }
+            existingAccounts = remainingAccounts;
+            System.out.print("\nExisting Accounts Count: " + existingAccounts);
+            
+            System.out.print(String.join(System.lineSeparator(),
+            "",
+            "=== WELCOME! ===",
             "1 - Register",
             "2 - Login",
-            "(Press Enter when empty to Exit Program)"
+            "----------------------------------------",
+            "(Press Enter when empty to Exit Program)",
+            "Input: "
             ));
 
             String choice = null;
@@ -26,14 +37,14 @@ public class Main {
             }
 
             if (choice == null || choice.trim().isEmpty()) {
-                System.out.println("App Closed");
+                System.out.println("\nApp Closed");
                 return;
             }
 
             switch (choice.trim()) {
                 case "1": //Register
                     if (existingAccounts >= 3) {
-                        System.out.println("Registered Accounts limit reached!");
+                        System.out.println("\nRegistered Accounts limit reached!");
                         continue;
                     }
                     
@@ -44,7 +55,7 @@ public class Main {
                     //Prevent registering the same emails
                     for (int i = 0; i < existingAccounts; i++) {
                         if (accounts[i].startsWith(savedEmail + ",")) {
-                            System.out.println("This email already has an existing account!");
+                            System.out.println("\nThis email already has an existing account!");
                             continue;
                         }
                     }
@@ -57,13 +68,13 @@ public class Main {
                     accounts[existingAccounts] = savedEmail + "," + savedPass + "," + savedUsername;
                     existingAccounts++;
                     
-                    System.out.println("Account Registered Successfully!");
+                    System.out.println("\nAccount Registered Successfully!");
                     break;
 
                 case "2": //Login
                     //If no registered account detected then return to Welcome Interface
-                    if (savedEmail == null || savedPass == null) {
-                        System.out.println("No registered account found — Please register first");
+                    if (existingAccounts == 0) {
+                        System.out.println("\nNo registered account found in system\nPlease register first");
                         continue;
                     }
                     boolean loggedIn = login(br, accounts, existingAccounts); //<Call Function
@@ -81,7 +92,7 @@ public class Main {
     //Register Email
     public static String registerEmail(BufferedReader br) {
         while (true) {
-            System.out.print("\n(Press Enter when empty to go back)\nRegister - Enter your Email:");
+            System.out.print("\n(Press Enter when empty to go back)\nRegister - Enter your Email: ");
             try {
                 String email = br.readLine();
                 if (email == null || email.trim().isEmpty()) return null;
@@ -99,10 +110,16 @@ public class Main {
     //Register Password
     public static String registerPassword(BufferedReader br) {
         while (true) {
-            System.out.print("\n(Press Enter when empty to go back)\nRegister - Enter your Password:");
+            System.out.print("\n(Press Enter when empty to go back)\nRegister - Enter your Password: ");
             try {
                 String pass = br.readLine();
-                if (pass == null || pass.trim().isEmpty()) return null;
+                if (pass == null || pass.isEmpty()) return null;
+                
+                if (pass.contains(" ")) {
+                    System.out.println("Password cannot contain spaces!");
+                    continue;
+                }
+                
                 if (pass.length() < 8) {
                     System.out.println("Password must at least have a minimum of 8 characters");
                     continue;
@@ -117,10 +134,10 @@ public class Main {
     //Register Username
     public static String registerUsername(BufferedReader br) {
         while (true) {
-            System.out.print("\nPlease set a username for your account:");
+            System.out.print("\nPlease set a username for your account: ");
             try {
                 String username = br.readLine();
-                if (username == null || username.trim().isEmpty()) {
+                if (username == null || username.isEmpty()) {
                     System.out.println("Username cannot be empty!");
                     continue;
                 }
@@ -161,7 +178,7 @@ public class Main {
                 String partsUsername = parts[2];
                 
                 if (email.equals(partsEmail) && pass.equals(partsPass)) {
-                    System.out.println("Login successful! Welcome " + partsUsername);
+                    System.out.println("\nLOGIN SUCCESSFUL! Welcome " + partsUsername);
                     return true;
                 }
             }
@@ -192,14 +209,17 @@ public class Main {
         };
 
         while (true) {
-            System.out.println(String.join(System.lineSeparator(),
+            System.out.print(String.join(System.lineSeparator(),
             "\n=== Shopping Mall ===",
             "(Type 'SEARCH' to open search box and search a product)",
             "(Type 'CART' to open shopping cart)",
+            "(Type 'VOUCHERS' to open voucher page)",
             "(Type 'USERNAME' to edit username)",
             "(Type 'PASSWORD' to change password)",
             "(Type 'DELETE' to delete account",
-            ""
+            "-------------------------------------------------------",
+            "(Press Enter when empty to go back)",
+            "Input: "
             ));
             for (int i = 0; i < products.length; i++) {
                 System.out.println(String.join(System.lineSeparator(),
@@ -207,7 +227,6 @@ public class Main {
                 "₱" + cost[i]
                 ));
             }
-            System.out.print("(Press Enter when empty to go back): ");
 
             String input = null;
             try {
@@ -226,7 +245,7 @@ public class Main {
             switch (input.toUpperCase()) { //Make string input commands not case sensitive
                 case "SEARCH":
                     while (true) {
-                        System.out.println("\nSearch a Product: ");
+                        System.out.print("\n=== SEARCH BOX ===\nSearch a Product: ");
                         String searchbox = null;
                         try {
                             searchbox = br.readLine();
@@ -240,39 +259,71 @@ public class Main {
                     }
                     continue;
                     
-                case "USERNAME":
+                case "CART":
                     while (true) {
+                        System.out.print("\n=== MY CART ===\nInput:");
+                        String cartInput = null;
+                        try {
+                            cartInput = br.readLine();
+                            if (cartInput == null || cartInput.trim().isEmpty()) break;
+                        } catch (IOException e) {
+                            System.out.println("Error");
+                            break;
+                        }
+                    }
+                    continue;
+                    
+                case "VOUCHERS":
+                    while (true) {
+                        System.out.println("\n=== VOUCHERS ===\nInput:");
+                        String voucherInput = null;
+                        try {
+                            voucherInput = br.readLine();
+                            if (voucherInput == null || voucherInput.trim().isEmpty()) break;
+                        } catch (IOException e) {
+                            System.out.println("Error");
+                            break;
+                        }
+                    }
+                    continue;
+                    
+                case "USERNAME":
+                    boolean usernameUpdated = false;
+                    while (!usernameUpdated) {
                         System.out.println("\n=== EDIT USERNAME ====");
                         try {
                             System.out.print("Enter New Username: ");
                             String newUsername = br.readLine();
                         
-                            if (newUsername == null || newUsername.trim().isEmpty()) {
-                                System.out.println("\nEdit Cancelled");
-                                break;
-                            }
-                        
-                            System.out.print("Enter Password: ");
-                            String inputPassword = br.readLine();
-                        
-                            if (inputPassword == null || inputPassword.trim().isEmpty()) {
+                            if (newUsername == null || newUsername.isEmpty()) {
                                 System.out.println("\nEdit Cancelled");
                                 break;
                             }
                             
-                            for (int i = 0; i < existingAccounts; i++) {
-                                String[] parts = accounts[i].split(",");
+                            while (true) {
+                                System.out.print("Enter Password: ");
+                                String inputPassword = br.readLine();
+                        
+                                if (inputPassword == null || inputPassword.isEmpty()) {
+                                    break;
+                                }
+                            
+                                for (int i = 0; i < existingAccounts; i++) {
+                                    String[] parts = accounts[i].split(",");
                             
             //Check if it matches current email and password to ensure it overwrites username
             //of correct account
-                                if (parts[0].equals(savedEmail) && parts[1].equals(inputPassword)) {
-                                    accounts[i] = parts[0] + "," + parts[1] + "," + newUsername.trim();
-                                    System.out.println("Saved! Username successfully updated");
-                                    break;
-                                } else {
-                                    System.out.println("Password Error! Try Again");
-                                    continue;
+                                    if (parts[0].equals(savedEmail) && parts[1].equals(inputPassword)) {
+                                        accounts[i] = parts[0] + "," + parts[1] + "," + newUsername.trim();
+                                        System.out.println("\nSaved! Username successfully updated");
+                                        usernameUpdated = true;
+                                    } else {
+                                        System.out.println("Password Error! Try Again");
+                                        continue;
+                                    }
                                 }
+                                
+                                if (usernameUpdated) break; //<Exit inner loop
                             }
                         } catch (IOException e) {
                             System.out.println("Error");
@@ -284,7 +335,7 @@ public class Main {
                     while (true) {
                         System.out.println("\n=== CHANGE PASSWORD ====");
                         try {
-                            System.out.print("Enter Current Password: ");
+                            System.out.println("Enter Current Password: ");
                             String inputPassword = br.readLine();
                         
                             if (inputPassword == null || inputPassword.isEmpty()) {
@@ -292,14 +343,37 @@ public class Main {
                                 break;
                             }
                             
+                    //Check if it matches current email and password to ensure it overwrites password
+                    //of correct account
+                            boolean passwordMatches = false;
                             for (int i = 0; i < existingAccounts; i++) {
                                 String[] parts = accounts[i].split(",");
                             
-            //Check if it matches current email and password to ensure it overwrites password
-            //of correct account
                                 if (parts[0].equals(savedEmail) && parts[1].equals(inputPassword)) {
+                                    passwordMatches = true;
+                                } else {
+                                    System.out.println("\nPassword Error! Try Again");
+                                    continue;
+                                }
+                                
+                                //Set New Password
+                                while (true) {
                                     System.out.print("Enter New Password: ");
                                     String newPassword = br.readLine();
+                                    
+                                    if (newPassword == null || newPassword.isEmpty()){
+                                        break;
+                                    }
+                                    
+                                    if (newPassword.contains(" ")) {
+                                        System.out.println("Password cannot contain spaces!");
+                                        continue;
+                                    }
+                                    
+                                    if (newPassword.length() < 8) {
+                                        System.out.println("Password must at least have a minimum of 8 characters");
+                                        continue;
+                                    }
                                     
                                     System.out.print("Enter Again: ");
                                     String confirmation = br.readLine();
@@ -309,12 +383,61 @@ public class Main {
                                         continue;
                                     } else {
                                         accounts[i] = parts[0] + "," + newPassword + "," + parts[2];
-                                        System.out.println("Password Successfully Changed!");
+                                        System.out.println("\nPassword Successfully Changed! Login again ");
+                                        return;
                                     }
+                                }
+                            }
+                        } catch (IOException e) {
+                            System.out.println("Error");
+                        }
+                    }
+                    continue;
+                    
+                case "DELETE":
+                    while (true) {
+                        try {
+                            System.out.print(String.join(System.lineSeparator(),
+                            "\n=== ARE YOU SURE YOU WANT TO DELETE YOUR ACCOUNT? ===",
+                            "===     DATA CANNOT BE RECOVERED ONCE DELETED!    ===",
+                            "Enter 'YES' to confirm",
+                            "(Enter when empty to cancel): "
+                            ));
+                            String confirmDelete = br.readLine();
+                        
+                            if (confirmDelete == null || confirmDelete.trim().isEmpty()) {
+                                System.out.println("\nAccount Deletion Cancelled");
+                                break;
+                            }
+                            
+                            if (!confirmDelete.equalsIgnoreCase("YES")) {
+                                System.out.println("\nInvalid Input! Try Again");
+                                continue;
+                            }
+                            
+                            while (true) {
+                                System.out.println("\nEnter your Password");
+                                String inputPassword = br.readLine();
+                            
+                                if (inputPassword == null || inputPassword.isEmpty()) {
                                     break;
-                                } else {
-                                    System.out.println("Password Error! Try Again");
-                                    continue;
+                                }
+                            
+                            //Check if it matches current email and password to ensure it deletes the
+                            //correct account
+                                for (int i = 0; i < existingAccounts; i++) {
+                                    String[] parts = accounts[i].split(",");
+                            
+                                    if (parts[0].equals(savedEmail) && 
+                                    parts[1].equals(inputPassword)) {
+                                        accounts[i] = null;
+                                        
+                                        System.out.println("\nACCOUNT SUCCESSFULLY DELETED");
+                                        return;
+                                    } else {
+                                        System.out.println("\nPassword Error! Try Again");
+                                        continue;
+                                    }
                                 }
                             }
                         } catch (IOException e) {
@@ -324,32 +447,49 @@ public class Main {
                     continue;
             }
             
-            //If not a selection command, convert to int to select product
-            int selected;
+            productSelection(br, input, products, cost, productDescription);
+        }
+    }
+    
+    public static void productSelection(BufferedReader br, String input, String[] products, int[] cost, String[] productDescription) {
+        while (true) {
             try {
-                selected = Integer.parseInt(input.trim());
-            } catch (NumberFormatException e) {
-                System.out.println("\nInvalid number! Try again");
-                return;
-            }
-
-            if (selected < 0 || selected >= products.length) {
-                System.out.println("\nProduct not found!");
-                continue;
-            }
-
-            System.out.println(String.join(System.lineSeparator(),
-            "\nYou selected: " + products[selected],
-            "Price: ₱" + cost[selected],
-            "Product Description:",
-            productDescription[selected],
-            "-----------------------------------",
-            "(Press Enter when empty to go back)"
-            ));
+                int selected;
+                try {
+                    selected = Integer.parseInt(input.trim());
+                } catch (NumberFormatException e) {
+                    System.out.println("\nInvalid Input! Try Again");
+                    return;
+                }
             
-            try {
+
+                if (selected < 0 || selected >= products.length) {
+                    System.out.println("\nProduct not found!");
+                    continue;
+                }
+
+                System.out.println(String.join(System.lineSeparator(),
+                "\nYou selected: " + products[selected],
+                "Price: ₱" + cost[selected],
+                "Product Description:",
+                productDescription[selected],
+                "-----------------------------------",
+                "Type 'ADD' to add product to cart",
+                "Type 'BUY' to immediately buy product",
+                "(Press Enter when empty to go back)"
+                ));
+                
+                System.out.print("Input: ");
                 String input2 = br.readLine();
-                if (input2 == null || input2.trim().isEmpty()) break;
+                if (input2 == null || input2.trim().isEmpty()) return;
+                
+                switch (input2.toUpperCase()) {
+                    case "ADD":
+                        break;
+                    case "BUY":
+                        break;
+                }
+                
             } catch (IOException e) {
                 System.out.println("Error");
             }
@@ -376,7 +516,7 @@ public class Main {
                 
             if (!found) {
                 System.out.println("Product not found");
-                continue;
+                break;
             }
                         
             System.out.print("\n(Press Enter when empty to go back)\nSelect Product: ");
@@ -390,40 +530,47 @@ public class Main {
                 //Convert input to integer          
                 try {
                     selected = Integer.parseInt(input.trim());
-                    if (!validIndex[selected]) {
-                        System.out.println("Invalid Selection!");
-                        continue;
-                    }
                 } catch (NumberFormatException e) {
-                    System.out.println("\nInvalid number! Try again");
+                    System.out.println("\nInvalid Input! Try Again");
                     return;
                 }
                 
+
                 if (selected < 0 || selected >= products.length) {
-                    System.out.println("\nProduct not found!");
+                    System.out.println("Invalid Selection! Try Again");
                     continue;
                 }
-                            
+                
+                //Prevent selecting other items not from search result
+                if (!validIndex[selected]) {
+                    System.out.println("Invalid! Prodoct not found from search results");
+                    continue;
+                }
+                
                 System.out.println(String.join(System.lineSeparator(),
                 "\nYou selected: " + products[selected],
                 "Price: ₱" + cost[selected],
                 "Product Description:",
                 productDescription[selected],
                 "-----------------------------------",
+                "Type 'ADD' to add product to cart",
+                "Type 'BUY' to immediately buy product",
                 "(Press Enter when empty to go back)"
                 ));
                           
-                            
-                try {
-                    String input2 = br.readLine();
-                    if (input2 == null || input2.trim().isEmpty()) return;
-                } catch (IOException e) {
-                    System.out.println("Error");
+                System.out.print("Input: ");
+                String input2 = br.readLine();
+                if (input2 == null || input2.trim().isEmpty()) return;
+                
+                switch (input2.toUpperCase()) {
+                    case "ADD":
+                        break;
+                    case "BUY":
+                        break;
                 }
                             
             } catch (IOException e) {
                 System.out.println("Error");
-                continue;
             }
         }
     }
