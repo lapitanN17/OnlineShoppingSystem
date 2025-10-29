@@ -1,30 +1,85 @@
 import java.io.*;
 
-public class Main {
+public class OnlineShoppingSystem {
     public static void main(String[] args) {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
 
         String[] accounts = new String[3];
         int existingAccounts = 0;
-        
         String savedEmail = null, savedPass = null, savedUsername = null;
+        
+        String[][] cartData = new String[3][5];
+        int cartProductsAmount = 0;
+        
+        String[] voucherData = new String[3];
+        int vouchersAmount = 0;
+        
+        
+        //-----------------------------------------------
+        int[] cost = { 69420, 42069, 6000, 24500, 35 };
+        String[] products = {
+            "myPhone 17 Super Pro Ultra Max",
+            "Samsinger Milkyway F25 Ultra",
+            "50 Shades of Grey",
+            "Skibidi Toilet Figurine Limited Edition",
+            "Genshin Impact Acrylic Keychains"
+        };
+        
+        String[] productDescription = {
+            "Introducing the new myPhone 17 Super Pro Ultra Max with the new 120hz Super Amoled Display",
+            "Introducing the new Samsinger Milkyway F25 Ultra packed with a new 1000mp telephoto camera lens capturing each detail for a pixel perfect photo",
+            "Is a chunchun romance novel by British Author E.L.James featuring explicitly chunchun scenes featuring elements of chunchun practices",
+            "[Limited Stock Only!] Skibidi Skibi Toilet Skibidi Skibidi Toilet",
+            "Genshin Impact custom made Acrylic Keychains — Available Characters: Furina, Flins, Varka, Capitano, Venti"
+        };
+        
+        String[] productVariants = { "Ugly Orange,Blue,Silver", "Black,White,Grey", "None", "None", "Furina,Flins,Varka,Capitano,Venti" };
+        
+        String[] productStock = { "1000,50,45", "128,256,512", "69", "1", "0,15,20,25,30" };
 
         while (true) {
-            //Update existingAccounts real time
+            //Update existingAccounts, cartProductsAmount and vouchersAmount in real time
             int remainingAccounts = 0;
+            int remainingCartProducts = 0;
+            int remainingVouchers = 0;
+            
             for (String account : accounts) {
                 if (account != null) remainingAccounts++;
             }
             existingAccounts = remainingAccounts;
             System.out.print("\nExisting Accounts Count: " + existingAccounts);
+            //-----------------------------------------------------------------
             
+            for (int j = 0; j < existingAccounts; j++) {
+                String[] parts = accounts[j].split(",");
+                if (savedEmail == null) break;
+                
+                //If logged in account matches accounts data then get index
+                if (savedEmail.equals(parts[0])) {
+                    for (String slot : cartData[j]) {
+                        if (slot != null) {
+                            remainingCartProducts++;
+                        }
+                    }
+                    cartProductsAmount = remainingCartProducts;
+                }
+            }
+            //-----------------------------------------------------------------
+            
+            for (String voucher : voucherData) {
+                if (voucher != null) remainingVouchers++;
+            }
+            vouchersAmount = remainingVouchers;
+            
+            //--------------------------------------------------
+            //Main Interface
             System.out.print(String.join(System.lineSeparator(),
             "",
             "=== WELCOME! ===",
-            "1 - Register",
-            "2 - Login",
+            "Register - 1",
+            " Login   - 2",
             "----------------------------------------",
-            "(Press Enter when empty to Exit Program)",
+            "(Press Enter to Exit Program)",
             "Input: "
             ));
 
@@ -53,12 +108,15 @@ public class Main {
                     if (savedEmail == null) continue;
                     
                     //Prevent registering the same emails
+                    boolean alreadyExists = false;
                     for (int i = 0; i < existingAccounts; i++) {
                         if (accounts[i].startsWith(savedEmail + ",")) {
                             System.out.println("\nThis email already has an existing account!");
-                            continue;
+                            alreadyExists = true;
+                            break;
                         }
                     }
+                    if (alreadyExists) continue;
                     
                     savedPass = registerPassword(br); //<Call Function
                     if (savedPass == null) continue;
@@ -79,12 +137,12 @@ public class Main {
                     }
                     boolean loggedIn = login(br, accounts, existingAccounts); //<Call Function
                     if (loggedIn) {
-                        shoppingMall(br, accounts, existingAccounts, savedEmail); //<Call Function
+                        shoppingMall(br, accounts, existingAccounts, savedEmail, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount); //<Call Function
                     }
                     break;
 
                 default:
-                    System.out.println("Invalid Input!");
+                    System.out.println("\nInvalid Input! Try Again");
             }
         }
     }
@@ -95,7 +153,7 @@ public class Main {
             System.out.print("\n(Press Enter when empty to go back)\nRegister - Enter your Email: ");
             try {
                 String email = br.readLine();
-                if (email == null || email.trim().isEmpty()) return null;
+                if (email.trim().isEmpty()) return null;
                 if (!email.endsWith("@gmail.com") && !email.endsWith("@email.com")) {
                     System.out.println("Invalid Email Address!");
                     continue;
@@ -113,15 +171,17 @@ public class Main {
             System.out.print("\n(Press Enter when empty to go back)\nRegister - Enter your Password: ");
             try {
                 String pass = br.readLine();
-                if (pass == null || pass.isEmpty()) return null;
+                if (pass.isEmpty()) return null;
                 
+                //Prevent spaces
                 if (pass.contains(" ")) {
                     System.out.println("Password cannot contain spaces!");
                     continue;
                 }
                 
+                //Prevent password if less sthan 8 characters
                 if (pass.length() < 8) {
-                    System.out.println("Password must at least have a minimum of 8 characters");
+                    System.out.println("\nPassword must at least have a minimum of 8 characters");
                     continue;
                 }
                 return pass; //Register Password
@@ -137,10 +197,34 @@ public class Main {
             System.out.print("\nPlease set a username for your account: ");
             try {
                 String username = br.readLine();
-                if (username == null || username.isEmpty()) {
-                    System.out.println("Username cannot be empty!");
+                if (username.isEmpty()) return null;
+                
+                //Prevent username being only spaces
+                if (username.replace(" ","").isEmpty()) {
+                    System.out.println("\nUsername must contain characters!");
                     continue;
                 }
+                
+                //Prevent if less than 3 characters
+                if (username.length() < 3) {
+                    System.out.println("\nUsername must contain at least 3 characters!");
+                    continue;
+                }
+                
+                //Prevent if it contain s special characters
+                boolean containsSC = false;
+                String[] specialCharacters = { 
+                    "!", "@", "#", "$", "%", "^", "&", "*", "(", ")", "-", "_", "=", "+", "[", "]", "{", "}", "\\", "|", ";", ":", "'", "\"", ",", ".", "<", ">", "/", "?"
+                };
+                for (String notAllowed : specialCharacters) {
+                    if (username.contains(notAllowed)) {
+                        System.out.println("\nUsername must not contain any special characters!");
+                        containsSC = true;
+                        break;
+                    }
+                }
+                if (containsSC) continue;
+                
                 return username.trim(); //Register Username
             } catch (IOException e) {
                 System.out.println("Error");
@@ -177,7 +261,7 @@ public class Main {
                 String partsPass = parts[1];
                 String partsUsername = parts[2];
                 
-                if (email.equals(partsEmail) && pass.equals(partsPass)) {
+                if (email.trim().equals(partsEmail) && pass.equals(partsPass)) {
                     System.out.println("\nLOGIN SUCCESSFUL! Welcome " + partsUsername);
                     return true;
                 }
@@ -190,26 +274,9 @@ public class Main {
 
 
     //Shopping Mall Interface
-    public static void shoppingMall(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail) {
-        String[] products = {
-            "myPhone 17 Super Pro Ultra Max",
-            "Samsinger Milkyway F25 Ultra",
-            "50 Shades of Grey",
-            "Skibidi Toilet Figurine Limited Edition",
-            "Genshin Impact Acrylic Keychains"
-        };
-        int[] cost = {69420, 42069, 6000, 24500, 150};
-        
-        String[] productDescription = {
-            "Introducing the new myPhone 17 Super Pro Ultra Max with the new 120hz Super Amoled Display that enhances colors vividly providing smooth scrolling on the go",
-            "Introducing the new Samsinger Milkyway F25 Ultra packed with a new 1000mp telephoto camera lens capturing each detail for a pixel perfect photo",
-            "Is a erotic romance novel by British Author E.L.James featuring explicitly erotic scenes featuring elements of sexual practices",
-            "[Limited Stock Only!] Skibidi Skibi Toilet Skibidi Skibidi Toilet",
-            "Genshin Impact custom made Acrylic Keychains — Available Characters: Venti, Zhongli, Raiden Shogun, Nahida, Furina, Mauvuika, Columbina, Flins, Varka, Capitano"
-        };
-
+    public static void shoppingMall(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount) {
         while (true) {
-            System.out.print(String.join(System.lineSeparator(),
+            System.out.println(String.join(System.lineSeparator(),
             "\n=== Shopping Mall ===",
             "(Type 'SEARCH' to open search box and search a product)",
             "(Type 'CART' to open shopping cart)",
@@ -218,19 +285,22 @@ public class Main {
             "(Type 'PASSWORD' to change password)",
             "(Type 'DELETE' to delete account",
             "-------------------------------------------------------",
-            "(Press Enter when empty to go back)",
-            "Input: "
+            "(Press Enter when empty to go back)"
             ));
+            
+            //Loop to print each product
             for (int i = 0; i < products.length; i++) {
                 System.out.println(String.join(System.lineSeparator(),
-                i + " - " + products[i],
+                "",
+                i + 1 + " - " + products[i],
                 "₱" + cost[i]
                 ));
             }
-
+            
+            System.out.print("Input: ");
             String input = null;
             try {
-                input = br.readLine();
+                input = br.readLine().trim();
                 if (input == null || input.trim().isEmpty()) {
                     System.out.println("\nReturning to login page...");
                     return;
@@ -240,9 +310,8 @@ public class Main {
                 continue;
             }
             
-            input = input.trim();
-            
-            switch (input.toUpperCase()) { //Make string input commands not case sensitive
+            //Convert input to uppercase before reading value
+            switch (input.toUpperCase().trim()) {
                 case "SEARCH":
                     while (true) {
                         System.out.print("\n=== SEARCH BOX ===\nSearch a Product: ");
@@ -255,27 +324,17 @@ public class Main {
                             break;
                         }
                         
-                        searchBoxSelection(br, input, searchbox, products, cost, productDescription);
+                        searchBoxSelection(br, accounts, existingAccounts, savedEmail, input, searchbox, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount);
                     }
-                    continue;
+                    break;
                     
                 case "CART":
-                    while (true) {
-                        System.out.print("\n=== MY CART ===\nInput:");
-                        String cartInput = null;
-                        try {
-                            cartInput = br.readLine();
-                            if (cartInput == null || cartInput.trim().isEmpty()) break;
-                        } catch (IOException e) {
-                            System.out.println("Error");
-                            break;
-                        }
-                    }
-                    continue;
+                    userCart(br, accounts, existingAccounts, savedEmail, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount);
+                    break;
                     
                 case "VOUCHERS":
                     while (true) {
-                        System.out.println("\n=== VOUCHERS ===\nInput:");
+                        System.out.println("\n=== VOUCHERS ===");
                         String voucherInput = null;
                         try {
                             voucherInput = br.readLine();
@@ -285,7 +344,7 @@ public class Main {
                             break;
                         }
                     }
-                    continue;
+                    break;
                     
                 case "USERNAME":
                     boolean usernameUpdated = false;
@@ -311,15 +370,15 @@ public class Main {
                                 for (int i = 0; i < existingAccounts; i++) {
                                     String[] parts = accounts[i].split(",");
                             
-            //Check if it matches current email and password to ensure it overwrites username
-            //of correct account
+                                    //Check if it matches current email and password to ensure it overwrites username
+                                    //of correct account
                                     if (parts[0].equals(savedEmail) && parts[1].equals(inputPassword)) {
                                         accounts[i] = parts[0] + "," + parts[1] + "," + newUsername.trim();
                                         System.out.println("\nSaved! Username successfully updated");
                                         usernameUpdated = true;
                                     } else {
                                         System.out.println("Password Error! Try Again");
-                                        continue;
+                                        //continue;
                                     }
                                 }
                                 
@@ -329,7 +388,7 @@ public class Main {
                             System.out.println("Error");
                         }
                     }
-                    continue;
+                    break;
                     
                 case "PASSWORD":
                     while (true) {
@@ -338,20 +397,18 @@ public class Main {
                             System.out.println("Enter Current Password: ");
                             String inputPassword = br.readLine();
                         
-                            if (inputPassword == null || inputPassword.isEmpty()) {
+                            if (inputPassword.trim() == null) {
                                 System.out.println("\nEdit Cancelled");
                                 break;
                             }
                             
-                    //Check if it matches current email and password to ensure it overwrites password
-                    //of correct account
-                            boolean passwordMatches = false;
+                            //Check if it matches current email and password to ensure it overwrites password
+                            //of correct account
                             for (int i = 0; i < existingAccounts; i++) {
                                 String[] parts = accounts[i].split(",");
-                            
-                                if (parts[0].equals(savedEmail) && parts[1].equals(inputPassword)) {
-                                    passwordMatches = true;
-                                } else {
+                                
+                                //Stop if password doesn't match
+                                if (!parts[0].equals(savedEmail) && !parts[1].equals(inputPassword)) {
                                     System.out.println("\nPassword Error! Try Again");
                                     continue;
                                 }
@@ -380,7 +437,7 @@ public class Main {
                                     
                                     if (!newPassword.equals(confirmation)) {
                                         System.out.println("Password Doesn't Match! Try Again");
-                                        continue;
+                                        //continue;
                                     } else {
                                         accounts[i] = parts[0] + "," + newPassword + "," + parts[2];
                                         System.out.println("\nPassword Successfully Changed! Login again ");
@@ -392,14 +449,14 @@ public class Main {
                             System.out.println("Error");
                         }
                     }
-                    continue;
+                    break;
                     
                 case "DELETE":
                     while (true) {
                         try {
                             System.out.print(String.join(System.lineSeparator(),
                             "\n=== ARE YOU SURE YOU WANT TO DELETE YOUR ACCOUNT? ===",
-                            "===     DATA CANNOT BE RECOVERED ONCE DELETED!    ===",
+                            "===      DATA CANNOT BE RECOVERED ONCE DELETED!     ===",
                             "Enter 'YES' to confirm",
                             "(Enter when empty to cancel): "
                             ));
@@ -436,7 +493,7 @@ public class Main {
                                         return;
                                     } else {
                                         System.out.println("\nPassword Error! Try Again");
-                                        continue;
+                                        //continue;
                                     }
                                 }
                             }
@@ -444,33 +501,36 @@ public class Main {
                             System.out.println("Error");
                         }
                     }
-                    continue;
+                    break;
             }
             
-            productSelection(br, input, products, cost, productDescription);
+            productSelection(br, accounts, existingAccounts, savedEmail, input, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount);
         }
     }
     
-    public static void productSelection(BufferedReader br, String input, String[] products, int[] cost, String[] productDescription) {
+    
+    
+    //Product Selection
+    public static void productSelection(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, String input, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount) {
         while (true) {
             try {
                 int selected;
                 try {
-                    selected = Integer.parseInt(input.trim());
+                    selected = Integer.parseInt(input.trim()) - 1;
                 } catch (NumberFormatException e) {
                     System.out.println("\nInvalid Input! Try Again");
                     return;
                 }
             
-
+                //If input is less than 1 or more than the printed products then stop
                 if (selected < 0 || selected >= products.length) {
                     System.out.println("\nProduct not found!");
-                    continue;
+                    break;
                 }
 
                 System.out.println(String.join(System.lineSeparator(),
-                "\nYou selected: " + products[selected],
-                "Price: ₱" + cost[selected],
+                "\n===== PRODUCT INFO =====",
+                "Name: " + products[selected],
                 "Product Description:",
                 productDescription[selected],
                 "-----------------------------------",
@@ -485,6 +545,7 @@ public class Main {
                 
                 switch (input2.toUpperCase()) {
                     case "ADD":
+                        addToCart(br, accounts, existingAccounts, savedEmail, selected, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount);
                         break;
                     case "BUY":
                         break;
@@ -495,17 +556,18 @@ public class Main {
             }
         }
     }
-    
-    public static void searchBoxSelection(BufferedReader br, String input, String searchbox, String[] products, int[] cost, String[] productDescription) {
+   
+    //Search box Selection
+    public static void searchBoxSelection(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, String input, String searchbox, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount) {
         boolean found = false;
         while (true) {
             boolean[] validIndex = new boolean[products.length];
-            System.out.println("\n=== SEARCH RESULTS ===");
+            System.out.println("\n=== SEARCH RESULTS ===\n");
             for (int i = 0; i < products.length; i++) {
                 //Make searchbox not case sensitive
                 if (products[i].toLowerCase().contains(searchbox.toLowerCase())) {
                     System.out.println(String.join(System.lineSeparator(),
-                    i + " - " + products[i],
+                    i + 1 + " - " + products[i],
                     "₱" + cost[i],
                     ""
                     ));
@@ -529,7 +591,7 @@ public class Main {
                 
                 //Convert input to integer          
                 try {
-                    selected = Integer.parseInt(input.trim());
+                    selected = Integer.parseInt(input.trim()) - 1;
                 } catch (NumberFormatException e) {
                     System.out.println("\nInvalid Input! Try Again");
                     return;
@@ -537,25 +599,26 @@ public class Main {
                 
 
                 if (selected < 0 || selected >= products.length) {
-                    System.out.println("Invalid Selection! Try Again");
+                    System.out.println("\nInvalid Selection! Try Again");
                     continue;
                 }
                 
                 //Prevent selecting other items not from search result
                 if (!validIndex[selected]) {
-                    System.out.println("Invalid! Prodoct not found from search results");
+                    System.out.println("\nInvalid! Product not found from search results");
                     continue;
                 }
                 
                 System.out.println(String.join(System.lineSeparator(),
-                "\nYou selected: " + products[selected],
-                "Price: ₱" + cost[selected],
-                "Product Description:",
-                productDescription[selected],
-                "-----------------------------------",
-                "Type 'ADD' to add product to cart",
-                "Type 'BUY' to immediately buy product",
-                "(Press Enter when empty to go back)"
+                        "\n===== PRODUCT INFO =====",
+                        "Name: " + products[selected],
+                        "Price: ₱" + cost[selected],
+                        "Product Description:",
+                        productDescription[selected],
+                        "-----------------------------------",
+                        "Type 'ADD' to add product to cart",
+                        "Type 'BUY' to immediately buy product",
+                        "(Press Enter when empty to go back)"
                 ));
                           
                 System.out.print("Input: ");
@@ -564,6 +627,7 @@ public class Main {
                 
                 switch (input2.toUpperCase()) {
                     case "ADD":
+                        addToCart(br, accounts, existingAccounts, savedEmail, selected, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount);
                         break;
                     case "BUY":
                         break;
@@ -571,6 +635,248 @@ public class Main {
                             
             } catch (IOException e) {
                 System.out.println("Error");
+            }
+        }
+    }
+    
+    
+    
+    //Add to Cart
+    public static void addToCart(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, int selected, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount) {
+        try {
+            //Prevent adding more to cart if user cart reaches 5
+            if (cartProductsAmount > 5) {
+                System.out.println("Cart is full!");
+                return;
+            }
+            
+            String[] variantType = productVariants[selected].split(",");
+            String[] stockAmount = productStock[selected].split(",");
+            int selectedVariantType = -1;
+            
+            //For Products with variants
+            boolean productIsAdded = false;
+            if (productVariants[selected].contains(",")) {
+                while (!productIsAdded) {
+                    System.out.println("\n=== Select Variant ===");
+                
+                    //Display Variants add 1 so it starts with one
+                    for (int i = 0; i < variantType.length; i++) {
+                        System.out.println((i + 1) + " - " + variantType[i]);
+                    }
+                    
+                    String selectVariant = br.readLine();
+                    if (selectVariant.trim().isEmpty()) {
+                        break;
+                    }
+                        
+                    int selectVariantInt = -1;
+                    try {
+                        selectVariantInt = Integer.parseInt(selectVariant) - 1;
+                    } catch (NumberFormatException e) {
+                        System.out.println("Invalid Input! Try Again");
+                        continue;
+                    }
+                
+                    //Prevent invalid variant selection
+                    if (selectVariantInt < 0 || selectVariantInt > variantType.length) {
+                        System.out.println("Invalid Variant! Select Another");
+                        continue;
+                    }
+                    
+                    selectedVariantType = selectVariantInt;
+                
+                
+                    
+                    //Select Stock
+                    while (!productIsAdded) { 
+                        //If variant stock is 0 then return
+                        if (stockAmount[selectedVariantType].equals("0")) {
+                            System.out.println("\nVariant Out of Stock! Select Another");
+                            break;
+                        }
+                    
+                        System.out.println("\n=== Select Amount ===");
+                        //Display Remaining Stock (Reduce by 1 since our print loop added an increment value)
+                        System.out.println("Available Stock: " + stockAmount[selectedVariantType]);
+                    
+                
+                        String selectAmount = br.readLine();
+                        if (selectAmount.trim().isEmpty()) {
+                           break;
+                        }
+                        
+                        int selectAmountInt = -1;
+                        try {
+                            selectAmountInt = Integer.parseInt(selectAmount);
+                        } catch (NumberFormatException e) {
+                            System.out.println("Invalid Input! Try Again");
+                            continue;
+                        }
+                    
+                    
+                        int stockAmountInt = Integer.parseInt(stockAmount[selectedVariantType]);
+                        //Prevent invalid amount selection
+                        if (selectAmountInt < 1 || selectAmountInt > stockAmountInt) {
+                            System.out.println("Invalid Amount!");
+                            continue;
+                        }
+                        
+                        while (true) {
+                            System.out.println("\nADDED TO CART SUCCESSFULLY!");
+                            System.out.println("Product: " + products[selected]);
+                            System.out.println("Variant: " + variantType[selectedVariantType]);
+                            System.out.println("Quantity: " + selectAmountInt);
+                            System.out.println("Price: " + cost[selected]);
+                            
+                            for (int i = 0; i < existingAccounts; i++) {
+                                String[] parts = accounts[i].split(",");
+                                //If logged in account matches accounts data then get index
+                                if (savedEmail.equals(parts[0])) {
+                                    for (int j = 0; j < cartData[i].length; j++) {
+                                        //If j is null or has no product data, add product data to that index
+                                        if (cartData[i][j] == null) {
+                                            cartData[i][j] =  products[selected] + "," + variantType[selectedVariantType] + "," + selectAmountInt + "," + cost[selected];
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+                        
+                            //Return Confirmation
+                            System.out.println("Press Enter to Return");
+                            String enterToExit = br.readLine();
+                            if (enterToExit.trim().isEmpty()) {
+                                productIsAdded = true;
+                                break;
+                            } else {
+                                System.out.println("Invalid Input!");
+                            }
+                        }
+                    }
+                }
+                
+            //For products without variants
+            } else {
+                while (!productIsAdded) { 
+                    //If variant stock is 0 then return
+                    if (productStock.equals("0")) {
+                        System.out.println("\nVariant Out of Stock! Select Another");
+                        break;
+                    }
+                    
+                    System.out.println("\n=== Select Amount ===");
+                    //Display Remaining Stock (Reduce by 1 since our print loop added an increment value)
+                    System.out.println("Available Stock: " + productStock[selected]);
+                    
+                
+                    String selectAmount = br.readLine();
+                    if (selectAmount.trim().isEmpty()) {
+                       break;
+                    }
+                        
+                    int selectAmountInt;
+                    try {
+                        selectAmountInt = Integer.parseInt(selectAmount);
+                    } catch (NumberFormatException e) {
+                        System.out.println("\nInvalid Input! Try Again");
+                        continue;
+                    }
+                    
+                    
+                    int stockAmountInt = Integer.parseInt(productStock[selected]);
+                    //Prevent invalid amount selection
+                    if (selectAmountInt < 1 || selectAmountInt > stockAmountInt) {
+                        System.out.println("\nInvalid Amount!");
+                        continue;
+                    }
+                    
+                    
+                    while (true) {
+                        System.out.println("\nADDED TO CART SUCCESSFULLY!");
+                        System.out.println("Product: " + products[selected]);
+                        System.out.println("Variant: No Variant Available");
+                        System.out.println("Quantity: " + selectAmountInt);
+                        System.out.println("Price: " + cost[selected]);
+                        
+                        for (int i = 0; i < existingAccounts; i++) {
+                            String[] parts = accounts[i].split(",");
+                            //If logged in account matches accounts data then get index
+                            if (savedEmail.equals(parts[0])) {
+                                for (int j = 0; j < cartData[i].length; j++) {
+                                    //If j is null or has no product data, add product data to that index
+                                    if (cartData[i][j] == null) {
+                                        cartData[i][j] =  products[selected] + "," + "No Variant Available" + "," + selectAmountInt + "," + cost[selected];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        
+                    
+                        //Return Confirmation
+                        System.out.println("Press Enter to Return");
+                        String enterToExit = br.readLine();
+                        if (enterToExit.trim().isEmpty()) {
+                            productIsAdded = true;
+                            break;
+                        } else {
+                            System.out.println("Invalid Input!");
+                        }
+                    }
+                }
+            }
+        } catch (IOException e) {
+            System.out.println("Error");
+        }
+    }
+    
+    
+    public static void userCart(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount) {
+        while (true) {
+            try {
+                System.out.print("\n=== MY CART ===");
+            
+                boolean hasProducts = false;
+                for (int i = 0; i < existingAccounts; i++) {
+                    String[] parts = accounts[i].split(",");
+                   //If logged in account matches accounts data then get index
+                    if (parts[0].equals(savedEmail.trim())) {
+                        for (int j = 0; j < cartData[i].length; j++) {
+                            if (cartData[i][j] != null) {
+                                String[] cartDataParts = cartData[i][j].split(",");
+                                System.out.println(String.join(System.lineSeparator(),
+                                        "\n#" + (j + 1),
+                                        "Product: " + cartDataParts[0],
+                                        "Variant: " + cartDataParts[1],
+                                        "Quantity: " + cartDataParts[2],
+                                        "Price: " + cartDataParts[3],
+                                        ""
+                                ));
+                                hasProducts = true;
+                            }
+                        }
+                       break;
+                    }
+                }
+            
+                if (!hasProducts) {
+                    System.out.println("\nYour Cart looks Empty! 0^0");
+                }
+            
+                String cartInput = br.readLine();
+                if (cartInput == null || cartInput.trim().isEmpty()) break;
+           
+                
+                int cartInputInt = -1;
+                try {
+                    cartInputInt = Integer.parseInt(cartInput);
+                } catch (NumberFormatException e) {
+                    System.out.println("Error");
+                }
+            } catch (IOException e) {
+                System.out.println("Error");
+                break;
             }
         }
     }
