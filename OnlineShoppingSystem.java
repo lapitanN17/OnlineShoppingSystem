@@ -814,6 +814,8 @@ public class OnlineShoppingSystem {
     
     //Add Products to Cart
     public static void addToCart(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, int selected, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount) {
+        boolean productIsAdded = false;
+        while (!productIsAdded) {
         try {
             //Update cartProductsAmount
             int remainingCartProducts = 0;
@@ -842,7 +844,6 @@ public class OnlineShoppingSystem {
             int selectedVariantType = -1;
             
             //For Products with variants
-            boolean productIsAdded = false;
             if (productVariants[selected].contains(",")) {
                 while (!productIsAdded) {
                     System.out.println("\n===== Select Variant =====");
@@ -913,7 +914,8 @@ public class OnlineShoppingSystem {
                             continue;
                         }
                         
-                        while (true) {
+                        
+                        while (!productIsAdded) {
                             //If product name and variant already exist in cart then run this part
                             boolean productExistsInCart = false;
                             for (int i = 0; i < existingAccounts; i++) {
@@ -975,6 +977,20 @@ public class OnlineShoppingSystem {
                             System.out.println("(Press Enter to Return)");
                             String enterToExit = br.readLine();
                             if (enterToExit.trim().isEmpty()) {
+                                
+                                //Update productStock after adding to cart
+                                //If Product has variants
+                                if (productStock[selected].contains(",")) {
+                                    String[] productStockParts = productStock[selected].split(",");
+                                    // Reduce the correct variant stock
+                                    int currentStockValue = Integer.parseInt(productStockParts[selectedVariantType]);
+                                    int deduct = currentStockValue - selectAmountInt;
+                                    productStockParts[selectedVariantType] = String.valueOf(deduct);
+
+                                    //Update stock amount
+                                    productStock[selected] = String.join(",", productStockParts);
+                                }
+                                    
                                 productIsAdded = true;
                                 break;
                             } else {
@@ -987,9 +1003,9 @@ public class OnlineShoppingSystem {
             //For products without variants
             } else {
                 while (!productIsAdded) { 
-                    //If variant stock is 0 then return
+                    //If stock is 0 then return
                     if (productStock.equals("0")) {
-                        System.out.println("\nVariant Out of Stock! Select Another");
+                        System.out.println("\nOut of Stock! Select Another");
                         break;
                     }
                     
@@ -1043,12 +1059,18 @@ public class OnlineShoppingSystem {
                                 break;
                             }
                         }
-                        
+                 
                     
                         //Return Confirmation
                         System.out.println("(Press Enter to Return)");
                         String enterToExit = br.readLine();
                         if (enterToExit == null || enterToExit.trim().isEmpty()) {
+                            //Update productStock after adding to cart
+                            //Product has no variants
+                            int currentStockValue = Integer.parseInt(productStock[selected]);
+                            int deduct = currentStockValue - selectAmountInt;
+                            productStock[selected] = String.valueOf(deduct);
+                            
                             productIsAdded = true;
                             break;
                         } else {
@@ -1059,6 +1081,7 @@ public class OnlineShoppingSystem {
             }
         } catch (IOException e) {
             System.out.println("Error");
+        }
         }
     }
     
@@ -1308,6 +1331,7 @@ public class OnlineShoppingSystem {
                                 }
                             }
                           break;
+                          
                         default:
                             System.out.println("Invalid Input! Try Again");
                         }
@@ -2135,11 +2159,7 @@ public class OnlineShoppingSystem {
                         "input: "
                 ));
                 String input = br.readLine();
-                if (input == null || input.trim().isEmpty()) {
-                    break;
-                } else {
-                    System.out.println("Invalid Input! Try Again");
-                }
+                if (input == null || input.trim().isEmpty()) break;      
                 
                 switch (input.toUpperCase().trim()) {
                     case "COD":
