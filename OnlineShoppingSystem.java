@@ -1849,7 +1849,7 @@ public class OnlineShoppingSystem {
                                                 System.out.println("Payment Successful!");
                                             } catch (InterruptedException e) {}
                                         }
-                                        orderID = orderIDgenerator(br, purchasedProducts, purchasedAmount, orderID);
+                                        orderID = orderIDgenerator(orderID);
                                         System.out.println(String.join(System.lineSeparator(),
                                                 "\n===== THANK YOU FOR PURCHASING =====",
                                                 "OrderID: " + orderID,
@@ -2018,7 +2018,7 @@ public class OnlineShoppingSystem {
                                         }
                                     }
 
-                                    orderID = orderIDgenerator(br, purchasedProducts, purchasedAmount, orderID);
+                                    orderID = orderIDgenerator(orderID);
                                     System.out.println(String.join(System.lineSeparator(),
                                             "\n===== THANK YOU FOR PURCHASING =====",
                                             "OrderID: " + orderID,
@@ -2073,7 +2073,7 @@ public class OnlineShoppingSystem {
 
     
     //Order ID generator
-    public static String orderIDgenerator(BufferedReader br, String[][] purchasedProducts, int purchasedAmount, String orderID) {
+    public static String orderIDgenerator(String orderID) {
         String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
         String id = "";
         for (int i = 0; i < 8; i++) {
