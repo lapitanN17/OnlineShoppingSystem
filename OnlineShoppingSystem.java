@@ -121,7 +121,12 @@ public class OnlineShoppingSystem {
                                 existingAccounts++;
                                 
                                 accountRegistered = true;
-                                System.out.println("\nAccount Registered Successfully!");
+                                try {
+                                    System.out.println("\nRegistration In Process\nPlease Wait...");
+                                    Thread.sleep(2000);
+                                    System.out.println("\nAccount Registered Successfully!");
+                                } catch (InterruptedException e) {
+                                }
                                 break;
                             }
                         }
@@ -266,15 +271,23 @@ public class OnlineShoppingSystem {
             for (int i = 0; i < existingAccounts; i++) {
                 String[] parts = accounts[i].split(",");
                 if (email.trim().equals(parts[0]) && pass.equals(parts[1])) {
-                    System.out.println("\n\nLOGIN SUCCESSFUL! Welcome " + parts[2]);
+                    try {
+                        System.out.println("\nProcessing Please Wait...");
+                        Thread.sleep(2000);
+                        System.out.println("\n\nLOGIN SUCCESSFUL! Welcome " + parts[2]);
+                    } catch (InterruptedException e) {
+                    }
                     return i; //Return index of logged-in account
                 }
             }
-
-            System.out.println("\nEmail or Password Error! Try Again");
+            try {
+                System.out.println("\nProcessing Please Wait...");
+                Thread.sleep(2000);
+                System.out.println("\nEmail or Password Error! Try Again");
+            } catch (InterruptedException e) {
+            }      
         }
     }
-
 
 
 
@@ -348,7 +361,12 @@ public class OnlineShoppingSystem {
             try {
                 input = br.readLine().trim();
                 if (input == null || input.trim().isEmpty()) {
-                    System.out.println("\nLogged Out\nReturning to login page...");
+                    try {
+                        System.out.println("\nLogging Out...");
+                        Thread.sleep(3000);
+                        System.out.println("LOGGED OUT");
+                    } catch (InterruptedException e) {
+                    }
                     return;
                 }
             } catch (IOException e) {
@@ -474,11 +492,21 @@ public class OnlineShoppingSystem {
                                     //of correct account
                                     if (parts[0].equals(loggedInEmail) && parts[1].equals(inputPassword)) {
                                         accounts[i] = parts[0] + "," + parts[1] + "," + newUsername.trim();
-                                        System.out.println("\nSaved! Username successfully updated");
+                                        try {
+                                            System.out.println("\nProcessing Please Wait...");
+                                            Thread.sleep(3000);
+                                            System.out.println("\nSAVED! Username successfully updated");
+                                        } catch (InterruptedException e) {
+                                        }
+                                        
                                         usernameUpdated = true;
                                     } else {
-                                        System.out.println("Password Error! Try Again");
-                                        //continue;
+                                        try {
+                                            System.out.println("\nProcessing Please Wait...");
+                                            Thread.sleep(3000);
+                                            System.out.println("PASSWORD ERROR! Try Again");
+                                        } catch (InterruptedException e) {
+                                        }
                                     }
                                 }
                                 
@@ -509,7 +537,7 @@ public class OnlineShoppingSystem {
                                 
                                 //Stop if password doesn't match
                                 if (!parts[0].equals(loggedInEmail) && !parts[1].equals(inputPassword)) {
-                                    System.out.println("\nPassword Error! Try Again");
+                                    System.out.println("\nPASSWORD ERROR! Try Again");
                                     continue;
                                 }
                                 
@@ -536,11 +564,20 @@ public class OnlineShoppingSystem {
                                     String confirmation = br.readLine();
                                     
                                     if (!newPassword.equals(confirmation)) {
-                                        System.out.println("\nPassword Doesn't Match! Try Again");
-                                        //continue;
+                                        try {
+                                            System.out.println("\nProcessing Please Wait...");
+                                            Thread.sleep(3000);
+                                            System.out.println("PASSWORD DOESN'T MATCH! Try Again");
+                                        } catch (InterruptedException e) {
+                                        }
                                     } else {
                                         accounts[i] = parts[0] + "," + newPassword + "," + parts[2];
-                                        System.out.println("\nPassword Successfully Changed! Login again ");
+                                        try {
+                                            System.out.println("\nProcessing Please Wait...");
+                                            Thread.sleep(3000);
+                                            System.out.println("PASSWORD SUCCESSFULLY CHANGED! Login again ");
+                                        } catch (InterruptedException e) {
+                                        }
                                         return;
                                     }
                                 }
@@ -579,18 +616,13 @@ public class OnlineShoppingSystem {
                             System.out.print("\nEnter your Password: ");
                             String inputPassword = br.readLine();
 
-                            if (inputPassword == null || inputPassword.isEmpty()) {
-                                break;
-                            }
-                            
+                            if (inputPassword == null || inputPassword.isEmpty()) break;
+
                             System.out.print("\nEnter your Password Again: ");
                             String inputPasswordAgain = br.readLine();
 
-                            if (inputPasswordAgain == null || inputPasswordAgain.isEmpty()) {
-                                break;
-                            }
-                            
-                            //Stop if password doesn't match
+                            if (inputPasswordAgain == null || inputPasswordAgain.isEmpty()) break;
+
                             if (!inputPassword.equals(inputPasswordAgain)) {
                                 System.out.println("PASSWORD DOESN'T MATCH!");
                                 continue;
@@ -601,15 +633,61 @@ public class OnlineShoppingSystem {
                                 String[] parts = accounts[i].split(",");
 
                                 if (parts[0].equals(loggedInEmail) && parts[1].equals(inputPassword)) {
-                                    accounts[i] = null;
-                                    //Delete data of that account
-                                    for (int j = 0; j < cartData[i].length; j++) cartData[i][j] = null;
+
+                                    //Return quantities from cartData to productStock
+                                    for (int j = 0; j < cartData[i].length; j++) {
+                                        if (cartData[i][j] != null) {
+                                            String[] cartParts = cartData[i][j].split(",");
+                                            String productName = cartParts[0];
+                                            String variant = cartParts[1];
+                                            int quantity = Integer.parseInt(cartParts[2]);
+
+                                            for (int k = 0; k < products.length; k++) {
+                                                if (products[k].equals(productName) && productVariants[k].equals(variant)) {
+                                                    productStock[k] = String.valueOf(Integer.parseInt(productStock[k]) + quantity);
+                                                    break;
+                                                }
+                                            }
+
+                                            cartData[i][j] = null;
+                                        }
+                                    }
+
+                                    //Return quantities from purchasedProducts to productStock
+                                    for (int j = 0; j < purchasedProducts[i].length; j++) {
+                                        if (purchasedProducts[i][j] != null) {
+                                            String[] purchasedParts = purchasedProducts[i][j].split(",");
+                                            String productName = purchasedParts[0];
+                                            String variant = purchasedParts[1];
+                                            int quantity = Integer.parseInt(purchasedParts[2]);
+
+                                            for (int k = 0; k < products.length; k++) {
+                                                if (products[k].equals(productName) && productVariants[k].equals(variant)) {
+                                                    productStock[k] = String.valueOf(Integer.parseInt(productStock[k]) + quantity);
+                                                    break;
+                                                }
+                                            }
+
+                                            purchasedProducts[i][j] = null; // clear purchased products
+                                        }
+                                    }
+
+                                    //Clear voucher data
                                     for (int j = 0; j < voucherData[i].length; j++) voucherData[i][j] = null;
-                                    for (int j = 0; j < purchasedProducts[i].length; j++) purchasedProducts[i][j] = null;
-                                    System.out.println("\nACCOUNT SUCCESSFULLY DELETED");
+
+                                    //Delete account
+                                    accounts[i] = null;
+                                    
+                                    try {
+                                        System.out.println("\nDeleting Account...");
+                                        Thread.sleep(5000);
+                                        System.out.println("ACCOUNT SUCCESSFULLY DELETED");
+                                    } catch (InterruptedException e) {
+                                    }
                                     return;
                                 }
                             }
+
                             System.out.println("\nPassword Error! Try Again");
                         }
                     } catch (IOException e) {
@@ -717,10 +795,17 @@ public class OnlineShoppingSystem {
     //Search box Selection
     public static void searchBoxSelection(BufferedReader br, String[] accounts, int existingAccounts, String loggedInEmail, String input, String searchbox, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount, String[][] voucherData, int vouchersAmount, String[][] purchasedProducts, int purchasedAmount, String orderID) {
         boolean found = false;
+        try {
+            System.out.println("\nSearching...");
+            Thread.sleep(1500); 
+        } catch (InterruptedException e) {
+        }
+        
         while (true) {
             //Mark product as true when found and enable it to be selected for later
             //Products that didn't appear are marked as false and prevent selection
             boolean[] validIndex = new boolean[products.length];
+            
             System.out.println("\n===== SEARCH RESULTS =====\n");
             for (int i = 0; i < products.length; i++) {
                 //Make searchbox not case sensitive
@@ -761,17 +846,16 @@ public class OnlineShoppingSystem {
             }
                 
             if (!found) {
-                System.out.println("\nProduct not found");
+                System.out.println("\nPRODUCT NOT FOUND");
                 break;
             }
                         
-            System.out.print("\n(Press Enter when empty to go back)\nSelect Product: ");
+            System.out.print("\n(Press Enter to Return)\nSelect Product: ");
             int selected;
             try {
                 input = br.readLine();
-                if (input == null || input.trim().isEmpty()) {
-                    break;
-                }
+                if (input == null || input.trim().isEmpty()) break;
+                
                 
                 //Convert input to integer          
                 try {
@@ -1845,8 +1929,8 @@ public class OnlineShoppingSystem {
                                         if (input.toUpperCase().trim().equals("OP")) {
                                             try {
                                                 System.out.println("Processing Payment\nPlease wait...");
-                                                Thread.sleep(3000);
-                                                System.out.println("Payment Successful!");
+                                                Thread.sleep(6000);
+                                                System.out.println("PAYMENT SUCCESSFUL!");
                                             } catch (InterruptedException e) {}
                                         }
                                         orderID = orderIDgenerator(orderID);
@@ -2012,8 +2096,8 @@ public class OnlineShoppingSystem {
                                     if (input.toUpperCase().trim().equals("OP")) {
                                         try {
                                             System.out.println("Processing Payment\nPlease wait...");
-                                            Thread.sleep(3000);
-                                            System.out.println("Payment Successful!");
+                                            Thread.sleep(6000);
+                                            System.out.println("PAYMENT SUCCESSFUL!");
                                         } catch (InterruptedException e) {
                                         }
                                     }
