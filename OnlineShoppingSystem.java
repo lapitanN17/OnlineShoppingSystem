@@ -23,8 +23,8 @@ public class OnlineShoppingSystem {
         int purchasedAmount = 0;
         
         
-        //-----------------------------------------------
-        int[] cost = { 69420, 42069, 6000, 24500, 35 };
+        //-----------------------------------------------+
+        int[] cost = { 69420, 42069, 5000, 24500, 35 };
         String[] products = {
             "myPhone 17 Super Pro Ultra to the Max",
             "Samsing Milkyway F25 Ultra",
@@ -44,6 +44,7 @@ public class OnlineShoppingSystem {
         String[] productVariants = { "Ugly Orange,Blue,Silver", "Black,White,Grey", "None", "None", "Furina,Flins,Varka,Capitano,Venti" };
         String[] productStock = { "1000,50,45", "128,256,512", "69", "1", "0,15,20,25,30" };
         
+        //"%OFF, Minimum Spend"
         String[] availableVouchers = { "5,5000", "10,10000", "15,15000", "20,40000", "20,60000" };
 
         while (true) {
@@ -56,7 +57,7 @@ public class OnlineShoppingSystem {
             
             
             //Main Interface
-            System.out.println("Existing Accounts: " + existingAccounts);
+            System.out.println("\nExisting Accounts: " + existingAccounts);
             System.out.print(String.join(System.lineSeparator(),
             "",
             "===== WELCOME! =====",
@@ -296,11 +297,33 @@ public class OnlineShoppingSystem {
             //Loop to print each product
             System.out.println("\n===== PRODUCTS =====");
             for (int i = 0; i < products.length; i++) {
-                System.out.println(String.join(System.lineSeparator(),
-                "",
-                i + 1 + " - " + products[i],
-                "$" + cost[i]
-                ));
+                boolean soldOut = true;
+                //length counts each string inside array
+                //length() with parenthesis counts each character inside a single string from an index inside array
+                //the length() of string "Hello" is 5 and the length is 1
+                for (int j = 0; j < productStock[i].length(); j++) {
+                    //check each character inside string
+                    char c = productStock[i].charAt(j);
+                    //If c is not equal to "0" and "," then assume product isn't soldOut yet
+                    if (c != '0' && c != ',') {
+                        soldOut = false;
+                    }
+                }
+                
+                if (soldOut) {
+                    System.out.println(String.join(System.lineSeparator(),
+                    "",
+                    "[SOLD OUT]",
+                    i + 1 + " - " + products[i],
+                    "$" + cost[i]
+                    ));
+                } else {
+                    System.out.println(String.join(System.lineSeparator(),
+                    "",
+                    i + 1 + " - " + products[i],
+                    "$" + cost[i]
+                    ));
+                }  
             }
             System.out.println("===========================");
             
@@ -340,22 +363,67 @@ public class OnlineShoppingSystem {
                     continue;
                   
                 case "BOUGHT":
-                    //purchasedProducts(br, accounts, existingAccounts, savedEmail, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount, voucherData, vouchersAmount);
-                    //Update purchasedAmount in real time
-                    int countPurchasedProducts = 0;
-                    for (int i = 0; i < accounts.length; i++) {
-                        if (accounts[i] == null) break;
-                        String[] parts = accounts[i].split(",");
+                    while (true) {
+                        //purchasedProducts(br, accounts, existingAccounts, savedEmail, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount, voucherData, vouchersAmount);
+                        //Update purchasedAmount in real time
+                        int countPurchasedProducts = 0;
+                        for (int i = 0; i < accounts.length; i++) {
+                            if (accounts[i] == null) continue;
+                            String[] parts = accounts[i].split(",");
                 
-                        //If logged in account matches accounts data then proceed
-                        if (savedEmail.equals(parts[0])) {
-                            for (int j = 0; j < purchasedProducts[i].length; j++) {
-                                if (purchasedProducts[i][j] != null) countPurchasedProducts++;
+                            //If logged in account matches accounts data then proceed
+                            if (savedEmail.equals(parts[0])) {
+                                for (int j = 0; j < purchasedProducts[i].length; j++) {
+                                    if (purchasedProducts[i][j] != null) countPurchasedProducts++;
+                                }
+                                break;
                             }
-                        break;
                         }
+                        purchasedAmount = countPurchasedProducts;
+                    
+                    
+                        System.out.println("\n=== YOUR PURCHASED PRODUCTS ===");
+                        System.out.println(purchasedAmount + "/10");
+                        
+                        for (int i = 0; i < accounts.length; i++) {
+                            if (accounts[i] == null) continue;
+                            String[] parts = accounts[i].split(",");
+                
+                           //If logged in account matches accounts data then proceed
+                            if (savedEmail.equals(parts[0])) {
+                                for (int j = 0; j < purchasedProducts[i].length; j++) {
+                                    if (purchasedProducts[i][j] == null) continue;
+                                    String[] purchasedProductsParts = purchasedProducts[i][j].split(",");
+                                    
+                                    System.out.println(String.join(System.lineSeparator(),
+                                            "------------------------------------------",
+                                            "Order #" + j + 1,
+                                            "Order ID:" + purchasedProductsParts[0],
+                                            "Name: " + purchasedProductsParts[1],
+                                            "Variant: " + purchasedProductsParts[2],
+                                            "Quantity: " + purchasedProductsParts[3],
+                                            "Cost: $" + purchasedProductsParts[4],
+                                            "------------------------------------------"
+                                    ));
+                                }
+                             //break;
+                            }
+                            
+                            while (true) {
+                                try {
+                                    String input2 = br.readLine();
+                                    if (input2 == null || input2.trim().isEmpty()) {
+                                        break;
+                                    } else {
+                                        System.out.println("Invalid Input! Try Again");
+                                    }
+                                } catch (IOException e) {
+                                    System.out.print("Error");
+                                }
+                            }
+                        }
+                        break;
                     }
-                    purchasedAmount = countPurchasedProducts;
                     continue;
                     
                 case "VOUCHERS":
@@ -519,7 +587,7 @@ public class OnlineShoppingSystem {
                     continue;
             }
             
-            //If it's not any of the matching string commands above then call function
+            //If it's not any of the matching string commands above then call this function
             productSelection(br, accounts, existingAccounts, savedEmail, input, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount, voucherData, vouchersAmount, purchasedProducts, purchasedAmount, orderID);
         }
     }
@@ -537,6 +605,20 @@ public class OnlineShoppingSystem {
                     System.out.println("Invalid Input! Try Again");
                     return;
                 }
+                
+                //If selected product is sold out then return to selection
+                boolean soldOut = true;
+                for (int i = 0; i < productStock[selected].length(); i++) {
+                    char c = productStock[selected].charAt(i);
+                    if (c != '0' && c != ',') {
+                        soldOut = false;
+                    }
+                }
+                if (soldOut) {
+                    System.out.println("SOLD OUT! Select Another");
+                    break;
+                }
+                
             
                 //If input is less than 1 or more than the printed products then stop
                 if (selected < 0 || selected >= products.length) {
@@ -565,6 +647,25 @@ public class OnlineShoppingSystem {
                         break;
                     case "BUY":
                         buyProduct(br, accounts, existingAccounts, savedEmail, products, cost, selected, productDescription, productVariants, productStock, cartData, cartProductsAmount, voucherData, vouchersAmount, purchasedProducts, purchasedAmount, orderID);
+                        boolean deleted = false;
+                        while (!deleted) {
+                            for (int i = 0; i < existingAccounts; i++) {
+                                String[] parts = accounts[i].split(",");
+                                //If logged in account matches then proceed
+                                if (savedEmail.equals(parts[0])) {
+                                    deleted = true;
+                                        
+                                    //Shift data from array
+                                    for (int j = selected; j < cartData[i].length - 1; j++) {
+                                        //Replace the current index with the data of index after
+                                        cartData[i][j] = cartData[i][j + 1];
+                                    }
+                                    //Set the last slot of array as null always
+                                    cartData[i][cartData[i].length - 1] = null;
+                                    break;
+                                }
+                            }
+                        }
                         break;
                 }
                 
@@ -578,18 +679,39 @@ public class OnlineShoppingSystem {
     public static void searchBoxSelection(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, String input, String searchbox, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount, String[][] voucherData, int vouchersAmount, String[][] purchasedProducts, int purchasedAmount, String orderID) {
         boolean found = false;
         while (true) {
+            //Mark product as true when found and enable it to be selected for later
+            //Products that didn't appear are marked as false and prevent selection
             boolean[] validIndex = new boolean[products.length];
             System.out.println("\n===== SEARCH RESULTS =====\n");
             for (int i = 0; i < products.length; i++) {
                 //Make searchbox not case sensitive
                 if (products[i].toUpperCase().contains(searchbox.toUpperCase())) {
-                    System.out.println(String.join(System.lineSeparator(),
-                    i + 1 + " - " + products[i],
-                    "$" + cost[i],
-                    ""
-                    ));
-                    validIndex[i] = true;
-                    found = true;
+                    boolean soldOut = true;
+                    for (int j = 0; j < productStock[i].length(); j++) {
+                        char c = productStock[i].charAt(j);
+                        if (c != '0' && c != ',') {
+                            soldOut = false;
+                        }
+                    }
+                    
+                    if (soldOut) {
+                        System.out.println(String.join(System.lineSeparator(),
+                                "[SOLD OUT]",
+                                i + 1 + " - " + products[i],
+                                "$" + cost[i],
+                                ""
+                        ));
+                        validIndex[i] = true;
+                        found = true;
+                    } else {
+                        System.out.println(String.join(System.lineSeparator(),
+                                i + 1 + " - " + products[i],
+                                "$" + cost[i],
+                                ""
+                        ));
+                        validIndex[i] = true;
+                        found = true;
+                    }
                 }
             }
                 
@@ -612,6 +734,19 @@ public class OnlineShoppingSystem {
                 } catch (NumberFormatException e) {
                     System.out.println("Invalid Input! Try Again");
                     return;
+                }
+                
+                //If selected product is sold out then return to selection
+                boolean soldOut = true;
+                for (int i = 0; i < productStock[selected].length(); i++) {
+                    char c = productStock[selected].charAt(i);
+                    if (c != '0' && c != ',') {
+                        soldOut = false;
+                    }
+                }
+                if (soldOut) {
+                    System.out.println("SOLD OUT! Select Another");
+                    break;
                 }
                 
 
@@ -648,9 +783,27 @@ public class OnlineShoppingSystem {
                         break;
                     case "BUY":
                         buyProduct(br, accounts, existingAccounts, savedEmail, products, cost, selected, productDescription, productVariants, productStock, cartData, cartProductsAmount, voucherData, vouchersAmount, purchasedProducts, purchasedAmount, orderID);
+                        boolean deleted = false;
+                        while (!deleted) {
+                            for (int i = 0; i < existingAccounts; i++) {
+                                String[] parts = accounts[i].split(",");
+                                //If logged in account matches then proceed
+                                if (savedEmail.equals(parts[0])) {
+                                    deleted = true;
+                                        
+                                    //Shift data from array
+                                    for (int j = selected; j < cartData[i].length - 1; j++) {
+                                        //Replace the current index with the data of index after
+                                        cartData[i][j] = cartData[i][j + 1];
+                                    }
+                                    //Set the last slot of array as null always
+                                    cartData[i][cartData[i].length - 1] = null;
+                                    break;
+                                }
+                            }
+                        }
                         break;
-                }
-                            
+                }            
             } catch (IOException e) {
                 System.out.println("Error");
             }
@@ -694,9 +847,13 @@ public class OnlineShoppingSystem {
                 while (!productIsAdded) {
                     System.out.println("\n===== Select Variant =====");
                 
-                    //Display Variants add 1 so it starts with one
+                    //Display Variants and add 1 so it starts with one
                     for (int i = 0; i < variantType.length; i++) {
-                        System.out.println((i + 1) + " - " + variantType[i]);
+                        if (stockAmount[i].equals("0")) {
+                            System.out.println((i + 1) + " - " + variantType[i] + " [SOLD OUT]");
+                        } else {
+                            System.out.println((i + 1) + " - " + variantType[i]);
+                        }
                     }
                     
                     System.out.print("Input: ");
@@ -1019,6 +1176,25 @@ public class OnlineShoppingSystem {
                     switch (input.toUpperCase().trim()) {
                         case "BUY":
                             buyProductFromCart(br, accounts, existingAccounts, savedEmail, cartInputInt, products, cost, productDescription, productVariants, productStock, cartData, cartProductsAmount, voucherData, vouchersAmount, purchasedProducts, purchasedAmount, orderID);
+                            boolean deleted = false;
+                            while (!deleted) {
+                                for (int i = 0; i < existingAccounts; i++) {
+                                    String[] parts = accounts[i].split(",");
+                                    //If logged in account matches then proceed
+                                    if (savedEmail.equals(parts[0])) {
+                                        deleted = true;
+                                        
+                                        //Shift data from array
+                                        for (int j = cartInputInt; j < cartData[i].length - 1; j++) {
+                                            //Replace the current index with the data of index after
+                                            cartData[i][j] = cartData[i][j + 1];
+                                        }
+                                        //Set the last slot of array as null always
+                                        cartData[i][cartData[i].length - 1] = null;
+                                        break;
+                                    }
+                                }
+                            }
                           break;
                           
                         case "DELETE" :
@@ -1410,7 +1586,7 @@ public class OnlineShoppingSystem {
                     }
                     
                     while (true) {
-                        System.out.print("\n(Press Enter to Return\nInput: ");
+                        System.out.print("\n(Press Enter to Return)\nInput: ");
                         String input2 = br.readLine();
                         if (input2 == null || input2.trim().isEmpty()) {
                             successfullyClaimed = true;
@@ -1431,6 +1607,7 @@ public class OnlineShoppingSystem {
     //Buy Product Directly
     public static void buyProduct(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, String[] products, int[] cost, int selected, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount, String[][] voucherData, int vouchersAmount, String[][] purchasedProducts, int purchasedAmount, String orderID) {
         boolean productPurchased = false;
+        int matching = -1;
         while (!productPurchased) {
             try {
                 //Update purchasedAmount in real time
@@ -1443,11 +1620,23 @@ public class OnlineShoppingSystem {
                     if (savedEmail.equals(parts[0])) {
                         for (int j = 0; j < purchasedProducts[i].length; j++) {
                             if (purchasedProducts[i][j] != null) countPurchasedProducts++;
-                        }
+                       }
                     break;
                     }
                 }
                 purchasedAmount = countPurchasedProducts;
+            
+                boolean limitReached = false;
+                for (int i = 0; i < accounts.length; i++) {
+                    if (purchasedAmount == purchasedProducts[i].length) {
+                        limitReached = true;
+                    }
+                }
+            
+                if (limitReached) {
+                    System.out.println("Purchase Limit Reached");
+                    break;
+                }
                     
                 String productName = null, variantType= null, selectedQty = null;
                 int price = 0;
@@ -1464,12 +1653,17 @@ public class OnlineShoppingSystem {
                 
                         //Display Variants add 1 so it starts with one
                         for (int i = 0; i < productVariantType.length; i++) {
-                            System.out.println((i + 1) + " - " + productVariantType[i]);
+                            if (stockAmount[i].equals("0")) {
+                                System.out.println((i + 1) + " - " + productVariantType[i] + " [SOLD OUT]");
+                            } else {
+                                System.out.println((i + 1) + " - " + productVariantType[i]);
+                           }
                         }
                     
                         System.out.print("Input: ");
                         String selectVariant = br.readLine();
-                        if (selectVariant.trim().isEmpty()) {
+                        if (selectVariant == null || selectVariant.trim().isEmpty()) {
+                            productPurchased = true;
                             break;
                         }
                         
@@ -1557,6 +1751,7 @@ public class OnlineShoppingSystem {
                                                 variantType = productVariantType[selectVariantInt];
                                                 selectedQty = String.valueOf(selectAmountInt);
                                                 price = discountedPrice;
+                                                matching = selectVariantInt;
                                         
                                                 productSelected = true;
                                             //If price doesnt meet voucher minimum requirements then run this part
@@ -1573,6 +1768,7 @@ public class OnlineShoppingSystem {
                                                 variantType = productVariantType[selectVariantInt];
                                                 selectedQty = String.valueOf(selectAmountInt);
                                                 price = total;
+                                                matching = selectVariantInt;
                                             
                                                 productSelected = true;
                                             }
@@ -1590,6 +1786,7 @@ public class OnlineShoppingSystem {
                                             variantType = productVariantType[selectVariantInt];
                                             selectedQty = String.valueOf(selectAmountInt);
                                             price = total;
+                                            matching = selectVariantInt;
                                         
                                             productSelected = true;
                                         }
@@ -1712,17 +1909,19 @@ public class OnlineShoppingSystem {
                                 }
                                 break;
                             }
+                            break;
                         }
                     }
                 } 
               
-                while (productPurchased) {
+                while (!productPurchased) {
                     System.out.print(String.join(System.lineSeparator(),
                             "----- Please Select Payment Method -----",
                             "Type 'COD' for Cash on Delivery",
                             "Type 'OP' for Online Payment",
                             "----------------------------------------",
-                            "(Press Enter to Return)"
+                            "(Press Enter to Return)",
+                            "Input: "
                     ));
            
                     String input = br.readLine();
@@ -1731,6 +1930,7 @@ public class OnlineShoppingSystem {
                 
                     switch (input.toUpperCase().trim()) {
                         case "COD":
+                        case "OP":
                             for (int i = 0; i < existingAccounts; i++) {
                                 String[] parts = accounts[i].split(",");
                                 //If logged in account matches accounts data then proceed
@@ -1738,6 +1938,17 @@ public class OnlineShoppingSystem {
                                     //Check if i(account data) for account exists
                                     for (int j = 0; j < cartData[i].length; j++) {
                                         if (purchasedProducts[i][j] != null) continue;
+                                        
+                                        //Run this part if input is equals to OP
+                                        if (input.toUpperCase().trim().equals("OP")) {
+                                            try {
+                                                System.out.println("Processing Payment\nPlease wait...");
+                                                Thread.sleep(3000); //3000 milliseconds = 3 seconds
+                                                System.out.println("Payment Successful!");
+                                            } catch (InterruptedException e) {
+                                            }
+                                        }
+
                                     
                                         orderID = orderIDgenerator(br, purchasedProducts, purchasedAmount, orderID); //<Call Function to generate a random ID
                                         System.out.println(String.join(System.lineSeparator(),
@@ -1753,7 +1964,24 @@ public class OnlineShoppingSystem {
                                     
                                         //Record purchased product
                                         purchasedProducts[i][j] = orderID + "," + productName + "," + variantType + "," + selectedQty + "," + price;
-                                        purchasedAmount++;
+                                        
+                                        //Update productStock after purchase
+                                        //If Product has variants
+                                        if (productStock[selected].contains(",")) {
+                                            String[] productStockParts = productStock[selected].split(",");
+                                            // Reduce the correct variant stock
+                                            int currentStockValue = Integer.parseInt(productStockParts[matching]);
+                                            int deduct = currentStockValue - Integer.parseInt(selectedQty);
+                                            productStockParts[matching] = String.valueOf(deduct);
+
+                                            //Update stock amount
+                                            productStock[selected] = String.join(",", productStockParts);
+                                        } else {
+                                            //Product has no variants
+                                            int currentStockValue = Integer.parseInt(productStock[selected]);
+                                            int deduct = currentStockValue - Integer.parseInt(selectedQty);
+                                            productStock[selected] = String.valueOf(deduct);
+                                        }
                                     
                                         productPurchased = true;
                                         break;
@@ -1773,11 +2001,10 @@ public class OnlineShoppingSystem {
                                 }
                             }
                           break;
-                        case "OP":
-                          break;
-                        default:
-                            System.out.println("Invalid Input! Try Again");
-                          break;
+                          
+                        //default:
+                        //    System.out.println("Invalid Input! Try Again");
+                        //  break;
                     }
                 }
             } catch (IOException e) {
@@ -1789,7 +2016,8 @@ public class OnlineShoppingSystem {
     
     //Buy Product from User Cart
     public static void buyProductFromCart(BufferedReader br, String[] accounts, int existingAccounts, String savedEmail, int cartInputInt, String[] products, int[] cost, String[] productDescription, String[] productVariants, String[] productStock, String[][] cartData, int cartProductsAmount, String[][] voucherData, int vouchersAmount, String[][] purchasedProducts, int purchasedAmount, String orderID) {
-        while (true) {
+        boolean completed = false;
+        while (!completed) {
             String productName = null, variantType= null, selectedQty = null;
             int price = 0;
             
@@ -1808,6 +2036,18 @@ public class OnlineShoppingSystem {
                 }
             }
             purchasedAmount = countPurchasedProducts;
+            
+            //If purchase limit is reached then return
+            boolean limitReached = false;
+            for (int i = 0; i < accounts.length; i++) {
+                if (purchasedAmount == purchasedProducts[i].length) {
+                    limitReached = true;
+                }
+            }
+            if (limitReached) {
+                System.out.println("Purchase Limit Reached");
+                break;
+            }
                     
             try {
                 System.out.println("\n===== BUY PRODUCT =====");
@@ -1887,11 +2127,12 @@ public class OnlineShoppingSystem {
                 }
                 
                 System.out.print(String.join(System.lineSeparator(),
-                        "----- Please Select Payment Method -----",
+                        "\n----- Please Select Payment Method -----",
                         "Type 'COD' for Cash on Delivery",
                         "Type 'OP' for Online Payment",
                         "----------------------------------------",
-                        "(Press Enter to Return)"
+                        "(Press Enter to Return)",
+                        "input: "
                 ));
                 String input = br.readLine();
                 if (input == null || input.trim().isEmpty()) {
@@ -1902,6 +2143,7 @@ public class OnlineShoppingSystem {
                 
                 switch (input.toUpperCase().trim()) {
                     case "COD":
+                    case "OP":
                         for (int i = 0; i < existingAccounts; i++) {
                             String[] parts = accounts[i].split(",");
                             //If logged in account matches accounts data then proceed
@@ -1910,9 +2152,19 @@ public class OnlineShoppingSystem {
                                 for (int j = 0; j < cartData[i].length; j++) {
                                     if (purchasedProducts[i][j] != null) continue;
                                     
+                                    //Run this part if input is equals to OP
+                                    if (input.toUpperCase().trim().equals("OP")) {
+                                        try {
+                                            System.out.println("Processing Payment\nPlease wait...");
+                                            Thread.sleep(3000); //3000 milliseconds = 3 seconds
+                                            System.out.println("Payment Successful!");
+                                        } catch (InterruptedException e) {
+                                        }
+                                    }
+                                    
                                     orderID = orderIDgenerator(br, purchasedProducts, purchasedAmount, orderID); //<Call Function to generate a random ID
                                     System.out.println(String.join(System.lineSeparator(),
-                                            "===== THANK YOU FOR PURCHASING =====",
+                                            "\n===== THANK YOU FOR PURCHASING =====",
                                             "OrderID: " + orderID,
                                             "-------- Type --------",
                                             "Product: " + productName,
@@ -1924,7 +2176,35 @@ public class OnlineShoppingSystem {
                                     
                                     //Record purchased product
                                     purchasedProducts[i][j] = orderID + "," + productName + "," + variantType + "," + selectedQty + "," + price;
-                                    purchasedAmount++;
+                                    
+                                    //Update productStock after purchase       
+                                    //If product has variants
+                                    if (productVariants[cartInputInt].contains(",")) {
+                                        String[] stockParts = productStock[cartInputInt].split(",");
+                                        String[] variantParts = productVariants[cartInputInt].split(",");
+
+                                        //Find the correct variant index
+                                        int variantIndex = -1;
+                                        for (int v = 0; v < variantParts.length; v++) {
+                                            if (variantParts[v].equals(variantType)) {
+                                                variantIndex = v;
+                                                break;
+                                            }
+                                        }
+
+                                        if (variantIndex != -1) {
+                                            int currentStock = Integer.parseInt(stockParts[variantIndex]);
+                                            int deduct = currentStock - Integer.parseInt(selectedQty);
+                                            stockParts[variantIndex] = String.valueOf(deduct);
+                                            productStock[cartInputInt] = String.join(",", stockParts);
+                                        }
+                                    
+                                    //If product has no variants
+                                    } else {                             
+                                        int currentStock = Integer.parseInt(productStock[cartInputInt]);
+                                        int deduct = currentStock - Integer.parseInt(selectedQty);
+                                        productStock[cartInputInt] = String.valueOf(deduct);
+                                    }  
                                     break;
                                 }
                                 break;
@@ -1935,13 +2215,16 @@ public class OnlineShoppingSystem {
                             try {
                                 System.out.println("(Press Enter to Return)");
                                 String input2 = br.readLine();
-                                if (input2 == null || input2.trim().isEmpty()) break;
+                                if (input2 == null || input2.trim().isEmpty()) {
+                                    completed = true;
+                                    break;
+                                } else {
+                                    System.out.println("Inavlid Input! Try Again");
+                                }
                             } catch (IOException e) {
                                 System.out.println("Error");
                             }
                         }
-                      break;
-                    case "OP":
                       break;
                 }
             } catch (IOException e) {
@@ -1952,15 +2235,13 @@ public class OnlineShoppingSystem {
     
     //Order ID generator
     public static String orderIDgenerator(BufferedReader br, String[][] purchasedProducts, int purchasedAmount, String orderID) {
-        while (true) {
-            String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-            String id = "";
-            for (int i = 0; i < 8; i++) {
-                int random = (int)(Math.random() * characters.length());
-                id += characters.charAt(random);
-            }
-            orderID = id;
-            return orderID;
+        String characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        String id = "";
+        for (int i = 0; i < 8; i++) {
+            int random = (int)(Math.random() * characters.length());
+            id += characters.charAt(random);
         }
+        orderID = id;
+        return orderID;
     }
 }
